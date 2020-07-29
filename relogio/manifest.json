@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "Relógio Digital",
+  "version": "0.0.1",
+  "description": "Um relógio digital para o Chrome",
+  "icons": {
+    "512": "relogio_icone.png"
+  },
+  "permissions": [
+    "activeTab", "http://*/*", "https://*/*"
+  ],
+  "browser_action": {
+    "default_icon": "relogio_icone.png",
+    "default_title": "Relógio Digital",
+    "default_popup": "popup.html"
+  }
+}
