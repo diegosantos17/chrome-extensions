@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Facebook Color Picker",
+  "version": "0.0.1",
+  "description": "Extensão para alterar cor da barra do facebook",
+  "icons": {
+    "325": "fb_trocar.png"
+  },
+  "permissions": [
+    "activeTab", "http://facebook.com/*", "https://facebook.com/*", "http://facebook.com.br/*", "https://facebook.com.br/*"
+  ],
+  "browser_action": {
+    "default_icon": "fb_trocar.png",
+    "default_title": "Facebook Color Picker",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["inside.js"]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+.container{
+    width: 200px;
+}
+.hidden{
+    display: none;
+}
+
+.nao-mapeado{
+    border-width:'2px';
+    border-color: purple;
+}
+.estrangulamento-em-atraso{
+    border-color: #FF0000;
+}
+.mockado{
+    border-color: #6A5ACD;
+}
+.estrangulamento-api-concluido{
+    border-color: #FFA500;
+}
+.estrangulamento-front-em-andamento {
+    border-color: #00BFFF;
+}
+.estrangulamento-front-conclúido {
+    border-color: #32CD32;
+}
+.estrangulamento-homologado {
+    border-color: #0000FF;
+}
+.estrangulamento-em-producao {
+    border-color: green;
+}
+
+.nao-mapeado{
+    border-style: dotted;
+}
+
+.estrangulamento-em-atraso,
+.mockado,
+.estrangulamento-front-em-andamento{
+    border-style: dotted;
+}
+
+.estrangulamento-front-concluido,
+.estrangulamento-api-concluido    
+{
+    border-style: groove;
+}
+
+.estrangulamento-homologado,
+.estrangulamento-em-producao {
+    border-width: 2px;
+    border-style: solid;
+}
+.leg {
+    margin-bottom: 6px;
+}
