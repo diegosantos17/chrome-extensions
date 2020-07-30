@@ -7,15 +7,20 @@
     "325": "buonny.png"
   },
   "permissions": [    
-    "activeTab", "https://tstportal.buonny.com.br/*", "https://portal.buonny.com.br/*", "http://tstportal.buonny.com.br/*", "http://portal.buonny.com.br/*"
+    "activeTab", "tabs", "background", "https://tstportal.buonny.com.br/*", "https://portal.buonny.com.br/*", "http://tstportal.buonny.com.br/*", "http://portal.buonny.com.br/*"
   ],
   "browser_action": {
     "default_icon": "buonny.png",
     "default_title": "Estrangulamento API Mapper",
     "default_popup": "popup.html"
   },
+  "background": {
+    "scripts": ["inside.js"],
+    "persistent": false
+  },
   "content_scripts": [
     {
+      "run_at": "document_end",
       "matches": ["http://*/*", "https://*/*"],
       "js": ["inside.js"],
       "css" : ["buonny-ext-estrang.css"]

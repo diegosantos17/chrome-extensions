@@ -1,12 +1,13 @@
-
-
 var tip, text;
+var fieldsSearch = [];
+var fieldsSearchSets = false;
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {    
     console.log('Atualizado status estrangulamento...');
-    var divTopo = document.getElementsByClassName("enviroment-color");
-    showLoader();
-        
+    var divTopo = document.getElementsByClassName("enviroment-color");    
+
+    showLoader();    
+
     if(divTopo != undefined && divTopo.length > 0){                        
         divTopo[0].style.borderColor = 'orange'
         divTopo[0].style.borderWidth = '3px'
@@ -16,31 +17,60 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         var xhr  = new XMLHttpRequest()
         xhr.open('GET', url, true)
         xhr.onload = function () {
-            var telas = JSON.parse(xhr.responseText);
-            if (xhr.readyState == 4 && xhr.status == "200") {                        
-                telas.fields.forEach(formatField);
-                setStyleTooltip();    
-                setBtnDetail();    
-                document.getElementById('divLoader').style.display = 'none';
-                console.log('Status estrangulamento atualizado!');
+
+            console.log('xhr', xhr)
+
+            if(xhr.status == 200){
+                var telas = JSON.parse(xhr.responseText);                
+
+                if (xhr.readyState == 4 && xhr.status == "200") {                        
+                    telas.fields.forEach(formatField);
+                    setStyleTooltip();    
+                    setBtnDetail();    
+                    document.getElementById('divLoader').style.display = 'none';
+                    console.log('Status estrangulamento atualizado!');
+                } else {
+                    console.error('Falha ao atualizar status estrangulamento!');
+                    console.error(telas);
+                }
             } else {
-                console.error('Falha ao atualizar status estrangulamento!');
-                console.error(telas);
+                showLoader(false);
             }
         }
         xhr.send(null);
     }    
 })
 
-function getPageName(){
-    let url = window.location.toString().split('/');
-    return url[url.length - 1];
-}
-
 function formatField(element, index, array) {    
-    let field = document.getElementById(element.id);
-    field.setAttribute('tooltip', setInfoField(element))
-    setClass(field, element.status);    
+    var field;
+
+    if(element.id == "BtnBuscar"){
+        let fieldTemp = document.querySelectorAll('[value="Buscar"]');
+        if(fieldTemp != null && fieldTemp.length > 0){
+            field = fieldTemp[0];            
+        }
+
+    } else {
+        field = document.getElementById(element.id);
+    }
+    
+    if(field != null && field != undefined){
+
+        if(element.id != "BtnBuscar"){
+            field.setAttribute('tooltip', setInfoField(element))
+        } else {
+            field.setAttribute('id','BtnBuscar')
+            field.setAttribute('endpoint', element.request.endpoint)            
+            field.setAttribute('tooltip', '')
+        }
+
+
+
+        if(element.request != null){
+            field.setAttribute('request_prop', element.request.property);
+        }
+        setClass(field, element.status);    
+    }
 }
 
 function setClass(field, status){
@@ -72,13 +102,34 @@ function setClass(field, status){
 function setBtnDetail(){
 
     var a = document.getElementsByTagName('*')
+    var fieldCount = 1;
+    var request_prop = '';
 
-    for (var x=0;x < a.length;x++) { // Cria o tooltip
-        console.log('text', text);
-        text = a[x].getAttribute('tooltip');            
+    for (var x=0;x < a.length;x++) { // Cria o tooltip        
+        text = a[x].getAttribute('tooltip');
+        
         if (text != null) {// Verifica se existe texto no tooltip
             var btnDetail = document.createElement('div');
-            btnDetail.innerHTML = '+';                                                
+            btnDetail.innerHTML = fieldCount;   
+            
+            if(a[x].getAttribute('id') == 'BtnBuscar'){
+                a[x].setAttribute('tooltip', setInfoFieldsSearch(a[x]))
+                setStyleTooltip(a[x]);
+                fieldsSearchSets = true;
+            }
+
+            if(fieldsSearchSets == false){
+                request_prop = a[x].getAttribute('request_prop');
+
+                console.log('request_prop', request_prop);
+
+                if(request_prop != null){
+                    fieldsSearch[fieldsSearch.length] = { id: fieldCount, name: request_prop}
+                }
+            }
+
+            fieldCount++;
+            
             btnDetail.style.top = (a[x].offsetTop + 6) + 'px';
             btnDetail.style.left = (a[x].offsetLeft + 10) + 'px';                
 
@@ -102,28 +153,42 @@ function setBtnDetail(){
                 let toolTipId = this.getAttribute('data-tooltip-id');
                 let toolTip = document.getElementById(toolTipId);
 
-                if(this.innerHTML == '+'){
-                    this.innerHTML = '-';                                                
+                if(this.style.backgroundColor == 'green'){
+                    //this.innerHTML = '-';                                                
                     this.style.backgroundColor = 'red';
                     toolTip.style.display = 'block';                         
                 } else {
-                    this.innerHTML = '+';                                                
+                    //this.innerHTML = '+';                                                
                     toolTip.style.display = 'none'; 
                     this.style.backgroundColor = 'green';
                 }                    
             }
         }        
-    }        
+    }   
+    var btnBuscar = document.querySelectorAll('[value="Buscar"]');
+
+    if(btnBuscar != null && btnBuscar != undefined){
+
+    }
 }
 
-function setStyleTooltip(){
+function setStyleTooltip(field = null ){
 
-    var a = document.getElementsByTagName('*')
+    var a = [];
+
+    if(field != null){
+        a[0] = document.getElementById(field.getAttribute('id'));
+
+        console.log('aaaa', a[0]);
+    } else {
+       a = document.getElementsByTagName('*');
+    }
 
     for (var x=0;x < a.length;x++) { // Cria o tooltip        
 
         text = a[x].getAttribute('tooltip');            
-        if (text != null) {// Verifica se existe texto no tooltip
+
+        if (text != null && text != '') {// Verifica se existe texto no tooltip
             let base = document.createElement('tooltip'); 
             base.innerHTML = text;                
                             
@@ -137,7 +202,7 @@ function setStyleTooltip(){
             base.style.borderWidth = '2px';
             base.style.borderStyle = 'solid';
             base.style.borderColor = '#333';     
-            base.style.fontSize = '15px';    
+            base.style.fontSize = '10px';    
             base.style.padding = '15px';
             base.style.display = 'none';
             base.style.zIndex = 999999;
@@ -149,23 +214,46 @@ function setStyleTooltip(){
 function setInfoField(field){
     let info = '';
     let templateInfo = `
-        <span style='font-weight: bold; font-size: 20px;'>{0}:</span><br>
-        <span style='font-weight: bold; padding-left: 20px'>endpoint: </span><span>{1}</span><br>
-        <span style='font-weight: bold; padding-left: 20px'>property: </span><span>{2}</span><br>
+        <span style='font-weight: bold; font-size: 12px;'>{0}:</span><br>
+        <span style='font-weight: bold; padding-left: 10px'>endpoint: </span><span><a href='{1}' target='_blank'>swagger</a></span><br>        
         `
+
+        // <span style='font-weight: bold; padding-left: 10px'>property: </span><span>{2}</span><br></br>
         
-    if(field.request != null && field.request != undefined){
-        info += templateInfo.replace('{0}', 'Request').replace('{1}', field.request.endpoint).replace('{2}', field.request.property)
-    }
+    // if(field.request != null && field.request != undefined){
+    //     info += templateInfo.replace('{0}', 'Request').replace('{1}', field.request.endpoint).replace('{2}', field.request.property)
+    // }
 
     if(field.response != null && field.response != undefined){
-        info += templateInfo.replace('{0}', 'Request').replace('{1}', field.response.endpoint).replace('{2}', field.response.property)
+        info += templateInfo.replace('{0}', 'Response').replace('{1}', field.response.endpoint).replace('{2}', field.response.property)
     }
         
     return info;
 }
 
-function showLoader(){
+function setInfoFieldsSearch(field){
+    let info = '';
+    let templateInfo = `
+        <span style='font-weight: bold; font-size: 12px;'>Request:</span><br>
+        <span style='font-weight: bold; padding-left: 10px'>endpoint: </span><span><a href='{0}' target='_blank'>swagger</a></span><br>
+        <span style='font-weight: bold; padding-left: 10px'>payload: </span><br>{1}
+    `        
+
+    let fieldsPayload = '';    
+
+    fieldsSearch.forEach(function (item, indice, array) {
+        console.log(item, indice);
+        fieldsPayload += '<span style="padding-left: 20px">' + item.id + ': ' + item.name + '</span><br>';        
+    });    
+
+    info = templateInfo.replace('{0}', field.getAttribute('endpoint')).replace('{1}', fieldsPayload)        
+        
+    return info;
+}
+
+
+
+function showLoader(show = true){
     var divLoader = document.getElementById('divLoader');    
 
     if(divLoader == null){
@@ -189,6 +277,16 @@ function showLoader(){
 
         document.body.appendChild(divLoader);
     } else {
-        divLoader.style.display = 'block';
+        if(show == true){
+            divLoader.style.display = 'block';
+        } else {
+            divLoader.style.display = 'none';
+        }
     }
+}
+
+function getPageName(){
+    let url = window.location.toString().split('portal/');
+    let urlFinal = url[1].split('?')[0];
+    return urlFinal;
 }
