@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Facebook Color Picker",
-  "version": "0.0.1",
-  "description": "Extensão para alterar cor da barra do facebook",
+  "name": "Estrangulamento API Mapper",
+  "version": "1.0.0",
+  "description": "Extensão para exibir mapeamento do estrangulamento",
   "icons": {
     "325": "buonny.png"
   },
@@ -11,7 +11,7 @@
   ],
   "browser_action": {
     "default_icon": "buonny.png",
-    "default_title": "Facebook Color Picker",
+    "default_title": "Estrangulamento API Mapper",
     "default_popup": "popup.html"
   },
   "content_scripts": [

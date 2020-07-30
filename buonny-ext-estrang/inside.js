@@ -1,4 +1,5 @@
-var base = document.createElement('tooltip'); //Defining all objects
+
+
 var tip, text;
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -9,21 +10,17 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if(divTopo != undefined && divTopo.length > 0){                        
         divTopo[0].style.borderColor = 'orange'
         divTopo[0].style.borderWidth = '3px'
-
-        // divTopo[0].onmouseover = function(){console.log('over')};
-        // divTopo[0].onmouseout = function(){console.log('out')};
-
-        // Get all users
+        
+        // Obtendo elementos da tela
         var url  = "https://buonny-mock-api-v3.herokuapp.com/telas?url=" + getPageName();
         var xhr  = new XMLHttpRequest()
         xhr.open('GET', url, true)
         xhr.onload = function () {
             var telas = JSON.parse(xhr.responseText);
-            if (xhr.readyState == 4 && xhr.status == "200") {
-                //console.table(telas.fields);
-                
+            if (xhr.readyState == 4 && xhr.status == "200") {                        
                 telas.fields.forEach(formatField);
                 setStyleTooltip();    
+                setBtnDetail();    
                 document.getElementById('divLoader').style.display = 'none';
                 console.log('Status estrangulamento atualizado!');
             } else {
@@ -40,8 +37,7 @@ function getPageName(){
     return url[url.length - 1];
 }
 
-function formatField(element, index, array) {
-    //console.log(element.id);
+function formatField(element, index, array) {    
     let field = document.getElementById(element.id);
     field.setAttribute('tooltip', setInfoField(element))
     setClass(field, element.status);    
@@ -50,10 +46,20 @@ function formatField(element, index, array) {
 function setClass(field, status){
 
     switch(status){
-        case 'mockado':
+        case 'mock':            
             field.style.borderWidth = '2px';
             field.style.borderColor = '#6A5ACD';
             field.style.borderStyle = 'dotted';
+            break;
+        case 'hml':
+                field.style.borderWidth = '2px';
+                field.style.borderColor = '#0000FF';
+                field.style.borderStyle = 'solid';
+                break;
+        case 'prod':
+            field.style.borderWidth = '2px';
+            field.style.borderColor = 'green';
+            field.style.borderStyle = 'solid';
             break;
         default:            
             field.style.borderWidth = '2px';
@@ -63,40 +69,80 @@ function setClass(field, status){
     }
 }
 
-function setStyleTooltip(){
+function setBtnDetail(){
 
     var a = document.getElementsByTagName('*')
 
     for (var x=0;x < a.length;x++) { // Cria o tooltip
-        a[x].onmouseover = function () {
-            text = this.getAttribute('tooltip');            
-            if (text != null) {// Verifica se existe texto no tooltip
-                base.innerHTML = text;                
-                if (document.getElementsByTagName('tooltip')[0]){
-                    document.getElementsByTagName('tooltip')[0].remove();
-                }
+        console.log('text', text);
+        text = a[x].getAttribute('tooltip');            
+        if (text != null) {// Verifica se existe texto no tooltip
+            var btnDetail = document.createElement('div');
+            btnDetail.innerHTML = '+';                                                
+            btnDetail.style.top = (a[x].offsetTop + 6) + 'px';
+            btnDetail.style.left = (a[x].offsetLeft + 10) + 'px';                
 
-                base.style.top = (event.pageY + 25) + 'px';
-                base.style.left = (event.pageX) + 'px';
+            btnDetail.setAttribute('data-tooltip-id', 'tol-' + a[x].getAttribute('id'))
+            btnDetail.style.position = 'fixed';
+            btnDetail.style.background = 'green';
+            btnDetail.style.color = '#fff';
+            btnDetail.style.borderWidth = '1px';
+            btnDetail.style.borderStyle = 'solid';
+            btnDetail.style.borderColor = '#333';     
+            btnDetail.style.borderRadius = '5px';     
+            btnDetail.style.fontSize = '10px';
+            btnDetail.style.width = '16px';
+            btnDetail.style.textAlign = 'center';
+            btnDetail.style.cursor = 'pointer';
 
-                base.style.position = 'fixed';
-                base.style.background = '#fff';
-                base.style.color = '#333';
-                base.style.borderWidth = '2px';
-                base.style.borderStyle = 'solid';
-                base.style.borderColor = '#333';     
-                base.style.fontSize = '15px';    
-                base.style.padding = '15px';
+            document.body.appendChild(btnDetail);                
 
-                document.body.appendChild(base);                
+            btnDetail.onclick = function(){
+
+                let toolTipId = this.getAttribute('data-tooltip-id');
+                let toolTip = document.getElementById(toolTipId);
+
+                if(this.innerHTML == '+'){
+                    this.innerHTML = '-';                                                
+                    this.style.backgroundColor = 'red';
+                    toolTip.style.display = 'block';                         
+                } else {
+                    this.innerHTML = '+';                                                
+                    toolTip.style.display = 'none'; 
+                    this.style.backgroundColor = 'green';
+                }                    
             }
-        };
+        }        
+    }        
+}
 
-        a[x].onmouseout = function () {
-            if(document.getElementsByTagName('tooltip').length > 0){
-                document.getElementsByTagName('tooltip')[0].remove();// Remove last tooltip
-            }
-        };        
+function setStyleTooltip(){
+
+    var a = document.getElementsByTagName('*')
+
+    for (var x=0;x < a.length;x++) { // Cria o tooltip        
+
+        text = a[x].getAttribute('tooltip');            
+        if (text != null) {// Verifica se existe texto no tooltip
+            let base = document.createElement('tooltip'); 
+            base.innerHTML = text;                
+                            
+            base.style.top = (a[x].offsetTop + 7) + 'px';
+            base.style.left = (a[x].offsetLeft + 28) + 'px';                
+
+            base.setAttribute('id', 'tol-' + a[x].getAttribute('id'));
+            base.style.position = 'fixed';
+            base.style.background = '#fff';
+            base.style.color = '#333';
+            base.style.borderWidth = '2px';
+            base.style.borderStyle = 'solid';
+            base.style.borderColor = '#333';     
+            base.style.fontSize = '15px';    
+            base.style.padding = '15px';
+            base.style.display = 'none';
+            base.style.zIndex = 999999;
+            document.body.appendChild(base);                
+        }        
     }        
 }
 
@@ -123,7 +169,7 @@ function showLoader(){
     var divLoader = document.getElementById('divLoader');    
 
     if(divLoader == null){
-        divLoader = document.createElement('div'); //Defining all objects    
+        divLoader = document.createElement('div');
         divLoader.innerHTML = 'Aguarde, atualizando status';
         divLoader.setAttribute('id', 'divLoader');
         divLoader.style.position = 'absolute'; 
