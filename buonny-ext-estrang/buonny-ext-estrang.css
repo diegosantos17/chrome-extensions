@@ -14,6 +14,8 @@
 }
 .mockado{
     border-color: #6A5ACD;
+    background-color: #d9babf;
+    
 }
 .estrangulamento-api-concluido{
     border-color: #FFA500;
@@ -26,9 +28,18 @@
 }
 .estrangulamento-homologado {
     border-color: #0000FF;
+    background-color: lightblue;
+}
+.dev-done {
+    border-width: 1px;
+    border-style: solid;
+    border-color: darkorange;
+    background-color:lightyellow;
 }
 .estrangulamento-em-producao {
     border-color: green;
+    background-color: #a6cda2;
+    
 }
 
 .nao-mapeado{

@@ -1,0 +1,52 @@
+body{
+    /* background-color: red !important; */
+}
+
+.btnDetailP {
+    background-color: green; 
+    width: 20px;
+    padding: 2px;
+    cursor: 'pointer';  
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+.teste{
+    background-color: red;;
+}
+
+/* ############## Formulário Tooltip: INICIO ##############*/
+#divFormPopUp2{
+    position: absolute; 
+    background-color: white; 
+    margin: auto;
+    top: 0;
+    right: 0;
+    border: 2px solid gray;
+    padding: 10px;
+    z-index: 99999;
+}
+
+#input-link_redmine{
+    width: 70px;
+}
+
+.form-readonly{
+    border: none !important;;
+}
+/* ############## Formulário Tooltip: INICIO ##############*/
+.show-tooltip{
+    visibility: visible;    
+}
+.hidden-tooltip{
+    visibility: hidden;    
+}
+
+.red{
+    background-color: red;
+}
+
+.green{
+    background-color: green;
+}
+

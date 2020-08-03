@@ -13,17 +13,15 @@
     "default_icon": "buonny.png",
     "default_title": "Estrangulamento API Mapper",
     "default_popup": "popup.html"
-  },
-  "background": {
-    "scripts": ["inside.js"],
-    "persistent": false
-  },
+  },  
+  "web_accessible_resources": [
+    "fix.css"
+  ],
   "content_scripts": [
-    {
-      "run_at": "document_end",
+    {      
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["inside.js"],
-      "css" : ["buonny-ext-estrang.css"]
+      "js": ["jquery-3.3.1.min.js", "fix.js", "inside.js"],
+      "css" : ["fix.css"]
     }
   ]
 }
