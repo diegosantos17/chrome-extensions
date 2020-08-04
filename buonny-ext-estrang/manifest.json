@@ -7,7 +7,7 @@
     "325": "buonny.png"
   },
   "permissions": [    
-    "activeTab", "tabs", "background", "https://tstportal.buonny.com.br/*", "https://portal.buonny.com.br/*", "http://tstportal.buonny.com.br/*", "http://portal.buonny.com.br/*"
+    "activeTab", "tabs", "storage", "background", "https://tstportal.buonny.com.br/*", "https://portal.buonny.com.br/*", "http://tstportal.buonny.com.br/*", "http://portal.buonny.com.br/*"
   ],
   "browser_action": {
     "default_icon": "buonny.png",

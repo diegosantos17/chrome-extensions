@@ -4,96 +4,137 @@ var fieldsSearchSets = false;
 var fieldCount = 1;
 var urlApi = "https://buonny-mock-api-v3.herokuapp.com";
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {    
-    console.log('Atualizado status estrangulamento...');
-    var divTopo = document.getElementsByClassName("enviroment-color");
-    fieldCount = 1;
-    console.log('control-group', $('.control-group').length);    
-    $('.btnDetailP').remove();
-    console.log('cadilam-ext', $('.btnDetailP').length);    
-    showLoader(true);        
-    insertFormPage();
-    insertBtnDetailsFromPage();
-    setFormTooltipAction();
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {        
+    var divTopo = document.getElementsByClassName("enviroment-color");            
+    let user = getUser();
 
-    if(divTopo != undefined && divTopo.length > 0){                        
-        divTopo[0].style.borderColor = 'orange'
-        divTopo[0].style.borderWidth = '3px'
-        
+    if(divTopo != undefined && divTopo.length > 0){                            
         // Obtendo elementos da tela
-        var url  = urlApi + "/telas?url=" + getPageName();
-        var xhr  = new XMLHttpRequest()
-        xhr.open('GET', url, true)
-        xhr.onload = function () {            
-            if(xhr.status == 200){
-                var telas = JSON.parse(xhr.responseText);                
-
-                if (xhr.readyState == 4 && xhr.status == "200") {                        
-                    telas.fields.forEach(formatField);
-                    //setStyleTooltip();
-                    //setBtnDetail();                                            
-                    setBtnDetailClick(telas._id);
-
-                    tableResultado = document.querySelectorAll('table[' + telas.tables[0].selector + ']');
-                    
-                    if(tableResultado != null && tableResultado.length > 0){
-                        console.log('tableResultado', tableResultado.offsetLeft, tableResultado.offsetTop);
-
-                        let thead = document.createElement('thead');
-                        let th = document.createElement('th');
-                        th.setAttribute('class', 'teste');
-                        th.innerText = fieldCount++;
-                        thead.appendChild(th);
-
-                        // insert a new node before the first list item
-                        tableResultado[0].insertBefore(thead, tableResultado[0].firstElementChild);
-                    }
-                    document.getElementById('divLoader').style.display = 'none';
-                    console.log('Status estrangulamento atualizado!');
-                } else {
-                    console.error('Falha ao atualizar status estrangulamento!');
-                    console.error(telas);
-                }
-            } else {
-                showLoader(false);
-            }
-        }
-        xhr.send(null);
+        if(user != null && user.email != ''){
+            divTopo[0].style.borderColor = 'orange'
+            divTopo[0].style.borderWidth = '3px'            
+            
+            loadFields();
         }    
+    }
 })
+
+function loadFields() {
+    insertFormPage();
+    $('.btnDetailP').remove();
+    fieldCount = 1;
+    console.log('Atualizado status estrangulamento...');
+    showLoader(true);
+
+    var url  = urlApi + "/telas?url=" + getPageName();
+    var xhr  = new XMLHttpRequest()
+    xhr.open('GET', url, true)
+    xhr.onload = function () {            
+        if(xhr.status == 200){
+            var telas = JSON.parse(xhr.responseText);                
+
+            if (xhr.readyState == 4 && xhr.status == "200") {                        
+                telas.fields.forEach(formatField);
+                insertBtnDetailsFromPage();
+                setFormTooltipAction();
+                //setStyleTooltip();
+                //setBtnDetail();                                            
+                setBtnDetailClick(telas._id);
+
+                tableResultado = document.querySelectorAll('table[' + telas.tables[0].selector + ']');
+                
+                if(tableResultado != null && tableResultado.length > 0){
+                    console.log('tableResultado', tableResultado.offsetLeft, tableResultado.offsetTop);
+
+                    let thead = document.createElement('thead');
+                    let th = document.createElement('th');
+                    th.setAttribute('class', 'teste');
+                    th.innerText = fieldCount++;
+                    thead.appendChild(th);
+
+                    // insert a new node before the first list item
+                    tableResultado[0].insertBefore(thead, tableResultado[0].firstElementChild);
+                }
+                document.getElementById('divLoader').style.display = 'none';
+                console.log('Status estrangulamento atualizado!');
+            } else {
+                console.error('Falha ao atualizar status estrangulamento!');
+                console.error(telas);
+            }
+        } else {
+            showLoader(false);
+        }
+    }
+    xhr.send(null);
+};
+
+
+function reloadPage(){
+    showLoader(true);
+    showLoader(false);
+}
+
 function setFormTooltipAction(){
+    $('#formTooltipField').unbind('submit');
     $('#formTooltipField').submit(function(event){        
 
         event.preventDefault();
         var $form = $(this);
-        // Let's select and cache all the fields        
-        var $inputs = $form.find("input, select, button, textarea");
 
-        // Serialize the data in the form
-        var serializedData = $form.serialize();
+        $idField = $form.children('#idField');
+        $idTela = $form.children('#idTela');
+        $status = $form.children('#status');
+        $dom_id = $form.children('#dom_id');
+        $dom_name = $form.children('#dom_name');
+        $dom_title = $form.children('#dom_title');
+        $dom_class = $form.children('#dom_class');
+        $redmine_issue_id = $form.children('#redmine_issue_id');
+        $swagger_prop_req_name = $('#swagger_prop_req_name');
+        $swagger_prop_resp_name = $('#swagger_prop_resp_name');
+        $input_link_resp_swagger = $('#input_link_resp_swagger');                
 
-        console.log('serializedData', serializedData);
+        $data = {
+            'idField': $idField.val(),                              
+            'status': $status.val(),
+            'dom_id': $dom_id.val(),
+            'dom_name': $dom_name.val(),
+            'dom_title': $dom_title.val(),
+            'dom_class': $dom_class.val(),
+            'dom_tag': $('#' + $dom_id.val()).prop('tagName'),
+            'redmine_issue_id': $redmine_issue_id.val(),
+            'swagger_prop_req_name': $swagger_prop_req_name.val(),
+            'swagger_prop_resp_name': $swagger_prop_resp_name.val(),
+            'input_link_resp_swagger': $input_link_resp_swagger.val()
+        }
 
-        $.ajax({
-            url: urlApi + "/fields",
-            type: "post",
-            data: serializedData,
-            success: function(data, textStatus, jqXHR)
-            {
-                console(data);
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-         
-            }
-        });
+        $(window).scrollTop(0);
 
-        // $('#redmine_issue_id').val();
-        // $('#swagger_prop_req_name').val();
-        // $('#swagger_prop_resp_name').val();
-        // $('#input-link_resp_swagger').val();
-
-
+        if($idField.val() == '' || $idField.val() == 'undefined'){
+            $.post(
+                urlApi + "/telas/" + $idTela.val() + "/fields", 
+                $data
+            )
+            .done(function(field){
+                $('#idField').val(field._id);
+                loadFields();
+                alert("Campo criado com sucesso");                
+            });
+        } else {            
+            $.ajax({
+                type: 'PUT',
+                url: urlApi + "/fields/" + $idField.val(),
+                contentType: 'application/json',
+                data: JSON.stringify($data), // access in body
+            }).done(function () {
+                console.log('SUCCESS');
+                loadFields();
+                alert("Campo alterado com sucesso");                
+            }).fail(function (msg) {
+                console.log('FAIL');
+            }).always(function (msg) {
+                console.log('ALWAYS');
+            });            
+        }                
     })
 }
 
@@ -102,11 +143,17 @@ function insertBtnDetailsFromPage(){
     let $field;
     let template = `
         <div class="btnDetailP" 
-            data-id="{id}" 
+            data-id="{data-id}" 
+            data-dom-id="{dom-id}" 
             data-name="{name}" 
             data-class="{class}" 
             data-title="{title}" 
             data-label="{label}" 
+            data-redmine_issue_id="{data-redmine_issue_id}"            
+            data-swagger_prop_req_name="{data-swagger_prop_req_name}" 
+            data-swagger_prop_resp_name="{data-swagger_prop_resp_name}" 
+            data-input_link_resp_swagger="{data-input_link_resp_swagger}"
+            data-status="{data-status}"
             data-tooltip-id="{idTooltip}">{value}
         </div>
     `
@@ -128,15 +175,20 @@ function insertBtnDetailsFromPage(){
                 labelDescription = $labelField.text();
             }
 
-            let buttonDetail =  template
-            .replace('{id}', $field.attr("id"))
+            let buttonDetail =  template            
+            .replace('{dom-id}', $field.attr("id"))
+            .replace('{data-id}', $field.attr("data-id"))                        
             .replace('{name}', $field.attr("name"))
             .replace('{class}', $field.attr("class"))
             .replace('{title}', $field.attr("title"))
             .replace('{label}', labelDescription)            
             .replace('{idTooltip}', 'tol-' + $field.attr("id"))
-            .replace('{value}', fieldCount);
-
+            .replace('{value}', fieldCount)
+            .replace('{data-redmine_issue_id}', $field.attr("data-redmine_issue_id"))
+            .replace('{data-swagger_prop_req_name}', $field.attr("data-swagger_prop_req_name"))                        
+            .replace('{data-swagger_prop_resp_name}', $field.attr("data-swagger_prop_resp_name"))            
+            .replace('{data-input_link_resp_swagger}', $field.attr("data-input_link_resp_swagger"))            
+            .replace('{data-status}', $field.attr("data-status"))
             $(this).append(buttonDetail);
             fieldCount++;
         }
@@ -162,41 +214,71 @@ function insertBtnDetailsFromPage(){
 }
 
 function formatField(element, index, array) {    
-    var field;
-
-    if(element.htmlAttribute != null && element.htmlAttribute != undefined){        
-        let fieldTemp = document.querySelectorAll(element.htmlDomTagName + "[" + element.htmlAttribute + "]");
-        if(fieldTemp != null && fieldTemp.length > 0){            
-            field = fieldTemp[0];            
-            field.setAttribute('custom-tag', element.htmlDomTagName + element.htmlAttributeValue);
-            field.setAttribute("id", element.htmlDomTagName + element.htmlAttributeValue);
-        }
-    }
-    if(element.id == "BtnBuscar"){
-        let fieldTemp = document.querySelectorAll('[value="Buscar"]');
-        if(fieldTemp != null && fieldTemp.length > 0){
-            field = fieldTemp[0];            
-        }
-
-    } else if(element.id != ''){
-        field = document.getElementById(element.id);
-    }
+        
+    var $field;
     
-    if(field != null && field != undefined){
-
-        if(element.id != "BtnBuscar"){
-            field.setAttribute('tooltip', setInfoField(element))
-        } else {
-            field.setAttribute('id','BtnBuscar')
-            field.setAttribute('endpoint', element.request.endpoint)            
-            field.setAttribute('tooltip', '')
-        }
-
-        if(element.request != null){
-            field.setAttribute('request_prop', element.request.property);
-        }
-        setClass(field, element.status);    
+    if(element.dom_id != null && element.dom_id != undefined){
+        $field = $('#' + element.dom_id);
     }
+
+    if(
+        ($field == null || $field == undefined)
+        && element.dom_title != null 
+        && element.dom_title != undefined
+        && element.dom_tag != null 
+        && element.dom_tag != undefined
+    ){
+        $field = $('"' + element.dom_tag + '[title=' + element.dom_tag + ']"');
+    }    
+    if($field != null && $field != undefined){        
+        $field.removeClass('nao-mapeado')
+        .removeClass('mockado')
+        .removeClass('estrangulamento-homologado')
+        .removeClass('dev-done')
+        .removeClass('estrangulamento-em-producao');        
+
+        $field.addClass(element.status);
+        $field.attr("data-id", element._id);        
+        $field.attr("data-redmine_issue_id", element.redmine_issue_id);
+        $field.attr("data-status", element.status);
+        $field.attr("data-swagger_prop_req_name", element.request.property);
+        $field.attr("data-swagger_prop_resp_name", element.response.property);
+        $field.attr("data-input_link_resp_swagger", element.response.endpoint);                
+    }    
+
+    // if(element.htmlAttribute != null && element.htmlAttribute != undefined){        
+    //     let fieldTemp = document.querySelectorAll(element.htmlDomTagName + "[" + element.htmlAttribute + "]");
+    //     if(fieldTemp != null && fieldTemp.length > 0){            
+    //         field = fieldTemp[0];            
+    //         field.setAttribute('custom-tag', element.htmlDomTagName + element.htmlAttributeValue);
+    //         field.setAttribute("id", element.htmlDomTagName + element.htmlAttributeValue);
+    //     }
+    // }
+    // if(element.id == "BtnBuscar"){
+    //     let fieldTemp = document.querySelectorAll('[value="Buscar"]');
+    //     if(fieldTemp != null && fieldTemp.length > 0){
+    //         field = fieldTemp[0];            
+    //     }
+
+    // } else if(element.id != ''){
+    //     field = document.getElementById(element.id);
+    // }
+    
+    // if(field != null && field != undefined){
+
+    //     if(element.id != "BtnBuscar"){
+    //         field.setAttribute('tooltip', setInfoField(element))
+    //     } else {
+    //         field.setAttribute('id','BtnBuscar')
+    //         field.setAttribute('endpoint', element.request.endpoint)            
+    //         field.setAttribute('tooltip', '')
+    //     }
+
+    //     if(element.request != null){
+    //         field.setAttribute('request_prop', element.request.property);
+    //     }
+    //     setClass(field, element.status);
+    // }
 }
 
 function setClass(field, status){
@@ -250,17 +332,25 @@ function setBtnDetailClick(idTela){
             $(this).removeClass ('green');
 
             $divFormPopUp2.removeClass('hidden-tooltip')
-            $divFormPopUp2.addClass('show-tooltip')            
-            //$divFormPopUp2.css({top: $(this).offset().top, left: $(this).offset().left + 30});                
+            $divFormPopUp2.addClass('show-tooltip')                        
 
-            $formTooltipField = $divFormPopUp2.children('form#formTooltipField');
-                        
+            $formTooltipField = $divFormPopUp2.children('form#formTooltipField');            
+            
             $formTooltipField.children('input#idTela').val(idTela);
-            $formTooltipField.children('input#dom_id').val($(this).attr('data-id'));
+            $formTooltipField.children('input#idField').val($(this).attr('data-id'));
+            $formTooltipField.children('input#dom_id').val($(this).attr('data-dom-id'));
             $formTooltipField.children('input#dom_name').val($(this).attr('data-name'));
             $formTooltipField.children('input#dom_title').val($(this).attr('data-title'));
             $formTooltipField.children('input#dom_class').val($(this).attr('data-class'));            
-            $formTooltipField.children('input#dom_label').val($(this).attr('data-label'));            
+            $formTooltipField.children('input#dom_label').val($(this).attr('data-label'));
+
+            $('input#redmine_issue_id').val($(this).attr('data-redmine_issue_id'));
+            $('input#swagger_prop_req_name').val($(this).attr('data-swagger_prop_req_name'));
+            $('select#status').val($(this).attr('data-status'));
+            $('input#swagger_prop_resp_name').val($(this).attr('data-swagger_prop_resp_name'));
+            $('input#input_link_resp_swagger').val($(this).attr('data-input_link_resp_swagger'));
+            
+            
         }        
     });
 }
@@ -432,6 +522,18 @@ function getPageName(){
 }
 
 function insertFormPage(){
+
+    $("#divFormPopUp2").remove();
+
+    let user = getUser();
+    
+    var readonly = (user.admin == true) ? ''  : 'readonly';
+    var disabled = (user.admin == true) ? ''  : 'disabled';
+    var display = (user.admin == true) ? '' : 'style="display:none"';
+
+    console.log('user', user);
+    console.log('user 2', user.admin);
+
     var templateFormPage = `
         <div id="divFormPopUp2" class="hidden-tooltip">
             <form id="formTooltipField">                
@@ -439,7 +541,7 @@ function insertFormPage(){
                 <input type="hidden" id="idField" name="idField" />
                 <input type="hidden" id="idTela" name="idTela" />
                 <h6>Estrangulamento Status</h6>
-                <select id="status" name="status">
+                <select id="status" name="status" {disabled}>
                     <option value="nao-mapeado">Não Mapeado</option>
                     <option value="mockado">Mockado</option>
                     <option value="dev-done">Dev Done</option>
@@ -454,24 +556,29 @@ function insertFormPage(){
                 <span class="label-ext">class:</span> <input type="text" class="form-readonly" id="dom_class" name="dom_class" readonly />
             
                 <h6>Redmine</h6>
-                <span class="label-ext">ID Issue:</span> <input id="redmine_issue_id" name="redmine_issue_id" type="text" value="" />
+                <span class="label-ext">ID Issue:</span> <input id="redmine_issue_id" name="redmine_issue_id" type="text" value="" {readonly} />
                 <a id="a-link-redmine" href="#">ver no Redmine</a>
                 <h6>Swagger (Api V3)</h6>            
                 <span class="label-ext">Request:</span>
                 <ul>
-                    <li>prop_name: <input id="swagger_prop_req_name" name="swagger_prop_req_name" type="text" value="" /></li>
+                    <li>prop_name: <input id="swagger_prop_req_name" name="swagger_prop_req_name" type="text" value="" {readonly} /></li>
                 </ul>
                 <span class="label-ext">Response:</span>
                 <ul>
-                    <li>prop_name: <input id="swagger_prop_resp_name" name="swagger_prop_resp_name" type="text" value="" /></li>
-                    <li>Link Swagger: <input id="input-link_resp_swagger" name="input-link_resp_swagger" type="text" value="" /></li>
+                    <li>prop_name: <input id="swagger_prop_resp_name" name="swagger_prop_resp_name" type="text" value="" {readonly} /></li>
+                    <li>Link Swagger: <input id="input_link_resp_swagger" name="input_link_resp_swagger" type="text" value="" {readonly} /></li>
                     <li>Swagger: <a id="a-link_resp_swagger" href="#">ver aqui</a></li>
                 </ul>
                 <hr />
-                <input type="submit" value="Salvar" />
+                <input type="submit" value="Salvar" {display} />
             </form>
         </div>
     `;    
+        
+    $('body').append(templateFormPage.replace(/{disabled}/g, disabled).replace(/{display}/g, display).replace(/{readonly}/g, readonly));
+}
 
-    $('body').append(templateFormPage);
+function getUser() {
+    var user = JSON.parse(localStorage.getItem("user"));
+    return user;
 }

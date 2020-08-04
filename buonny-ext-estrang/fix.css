@@ -3,10 +3,10 @@ body{
 }
 
 .btnDetailP {
-    background-color: green; 
+    background-color: blue; 
     width: 20px;
     padding: 2px;
-    cursor: 'pointer';  
+    cursor: pointer !important;
     color: white;
     border-radius: 5px;
     text-align: center;
@@ -34,7 +34,7 @@ body{
 .form-readonly{
     border: none !important;;
 }
-/* ############## Formulário Tooltip: INICIO ##############*/
+/* ############## Formulário Tooltip: FIM ##############*/
 .show-tooltip{
     visibility: visible;    
 }
@@ -50,3 +50,38 @@ body{
     background-color: green;
 }
 
+/* ######### LEGENDAS: INICIO ##############*/
+.nao-mapeado{
+    border-style: dotted !important;
+    border-color: purple !important;
+}
+.mockado{
+    border-style: dotted !important;
+    border-color: #6A5ACD !important;
+    background-color: #d9babf !important;
+    
+}
+.estrangulamento-homologado {
+    border-style: solid !important;
+    border-color: #0000FF !important;
+    background-color: lightblue!important;
+}
+.dev-done {    
+    border-style: solid !important;
+    border-color: darkorange !important;
+    background-color:lightyellow !important;
+}
+.estrangulamento-em-producao {
+    border-style: solid !important;
+    border-color: green !important;
+    background-color: #a6cda2 !important;
+    
+}
+.mockado,
+.nao-mapeado,
+.estrangulamento-homologado,
+.estrangulamento-em-producao,
+.dev-done {
+    border-width: 1px;    
+}
+/* ######### LEGENDAS: FIM ##############*/

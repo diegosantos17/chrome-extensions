@@ -12,10 +12,18 @@
     </style>
 </head>
 <body> 
-    <div class="container">   
-        <p class="hidden"><input type="text" value="#54aedb"></p>
-        <p class="hidden"></p>
+    <div id="divFormAuth" class="container">          
+        <h3>Status APIs</h3>
+        <h5>Autenticação:</h5>
+        <form id="formAuth" >            
+            <input type="text" name="email" id="email" placeholder="Email">            
+            <input type="password" name="senha" id="senha" placeholder="Senha">
 
+            <input type="submit" value="Acessar">
+        </form>
+    </div>
+    <div id="formLegenda" style="display: none;" class="container">           
+        <span id="spanUser"></span>
         <h3>Status APIs</h3>
         <h5>Legenda:</h5>
         
@@ -24,6 +32,10 @@
         <div class="leg dev-done">Dev Concluído</div>    
         <div class="leg estrangulamento-homologado">Homologado</div>
         <div class="leg estrangulamento-em-producao">Em Produção</div>
+
+        <form id="formLogout" >                        
+            <input type="submit" value="Logout">
+        </form>
     </div>
 
     <script src="jquery-3.3.1.min.js"></script>
