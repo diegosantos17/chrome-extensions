@@ -4,23 +4,33 @@ var fieldsSearchSets = false;
 var fieldCount = 1;
 var urlApi = "https://buonny-mock-api-v3.herokuapp.com";
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {        
-    var divTopo = document.getElementsByClassName("enviroment-color");            
-    let user = getUser();
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {                
+    
+    chrome.storage.sync.get('user', function (obj) {
+        if(obj.user !=null && obj.user != undefined){                        
+            localStorage.setItem('user', JSON.stringify('obj.user'));
+            loadFields(obj.user);
+        } else {
+            localStorage.removeItem('user');
+            $('.btnDetailP').remove();    
+            $("#divFormPopUp2").remove();
 
-    if(divTopo != undefined && divTopo.length > 0){                            
-        // Obtendo elementos da tela
-        if(user != null && user.email != ''){
-            divTopo[0].style.borderColor = 'orange'
-            divTopo[0].style.borderWidth = '3px'            
-            
-            loadFields();
+            $('.nao-mapeado').removeClass('nao-mapeado');
+            $('.mockado').removeClass('mockado');
+            $('.estrangulamento-homologado').removeClass('estrangulamento-homologado');
+            $('.dev-done').removeClass('dev-done');                
+            $('.estrangulamento-em-producao').removeClass('estrangulamento-em-producao');        
         }    
-    }
+    });    
+        
+    // var divTopo = document.getElementsByClassName("enviroment-color");            
+    // if(divTopo != undefined && divTopo.length > 0){                            
+            
+    // }
 })
 
-function loadFields() {
-    insertFormPage();
+function loadFields(user) {
+    insertFormPage(user);
     $('.btnDetailP').remove();
     fieldCount = 1;
     console.log('Atualizado status estrangulamento...');
@@ -116,7 +126,7 @@ function setFormTooltipAction(){
             )
             .done(function(field){
                 $('#idField').val(field._id);
-                loadFields();
+                loadFields(getUser());
                 alert("Campo criado com sucesso");                
             });
         } else {            
@@ -127,7 +137,7 @@ function setFormTooltipAction(){
                 data: JSON.stringify($data), // access in body
             }).done(function () {
                 console.log('SUCCESS');
-                loadFields();
+                loadFields(getUser());
                 alert("Campo alterado com sucesso");                
             }).fail(function (msg) {
                 console.log('FAIL');
@@ -521,11 +531,9 @@ function getPageName(){
     return urlFinal;
 }
 
-function insertFormPage(){
+function insertFormPage(user){
 
-    $("#divFormPopUp2").remove();
-
-    let user = getUser();
+    $("#divFormPopUp2").remove();    
     
     var readonly = (user.admin == true) ? ''  : 'readonly';
     var disabled = (user.admin == true) ? ''  : 'disabled';
